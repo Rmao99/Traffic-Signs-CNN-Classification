@@ -1,2 +1,2 @@
 # Traffic-Signs-CNN-Classification
-Uses a constitutional neural network to detect traffic signs
+Use convolutional neural networks to detect traffic signs using both shallownet and lenet networks.
