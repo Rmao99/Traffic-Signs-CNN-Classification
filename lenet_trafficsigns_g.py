@@ -1,5 +1,5 @@
 # USAGE
-# python shallownet_trafficsigns_b.py --training ./datasets/BelgiumTSC_Training --testing ./datasets/BelgiumTSC_Testing --model shallownet_trafficsigns_weights_b.hdf5
+# python lenet_trafficsigns_g.py --training ./datasets/GTSRB/Training/ --model lenet_trafficsigns_weights_g.hdf5
 
 # import the necessary packages
 
@@ -9,7 +9,7 @@ from sklearn.metrics import classification_report
 from cnn.preprocessing import ImageToArrayPreprocessor
 from cnn.preprocessing import SimplePreprocessor
 from cnn.datasets import SimpleDatasetLoader
-from cnn.nn.conv import ShallowNet
+from cnn.nn.conv import LeNet
 from keras.optimizers import SGD
 from imutils import paths
 import matplotlib.pyplot as plt
@@ -18,27 +18,23 @@ import argparse
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-tr", "--training", required=True,
-	help="path to input training dataset")
-ap.add_argument("-te", "--testing", required=True, 
-	help="path to input testing dataset")
+	help="path to input dataset")
 ap.add_argument("-m", "--model", required=True,
 	help ="path to output model")
 args = vars(ap.parse_args())
 
 print("[INFO] loading images...")
 trainingImagePaths = list(paths.list_images(args["training"]))
-testingImagePaths = list(paths.list_images(args["testing"]))
 
 sp = SimplePreprocessor(32,32)
 iap = ImageToArrayPreprocessor()
 
 #list of preprocessors to be applied in sequential order. First reordered to 32x32, then channel ordered properly to keras.json file
 sdl = SimpleDatasetLoader(preprocessors=[sp,iap]) #loads dataset then scale the raw pixel intensities from [0,1]
-(trainX,trainY) = sdl.load(trainingImagePaths,verbose = 500)
-trainX = trainX.astype("float")/255.0
+(data,labels) = sdl.load(trainingImagePaths,verbose = 500)
+data = data.astype("float")/255.0
 
-(testX,testY) = sdl.load(testingImagePaths,verbose = 500)
-testX = testX.astype("float")/255.0
+(trainX, testX, trainY, testY) = train_test_split(data,labels, test_size = 0.25, random_state=42)
 
 # convert the labels from integers to vectors
 lb = LabelBinarizer()
@@ -88,38 +84,19 @@ labelNames = ["00000",
 			  "00039",
 			  "00040",
 			  "00041",
-			  "00042",
-			  "00043",
-			  "00044",
-			  "00045",
-			  "00046",
-			  "00047",
-			  "00048",
-			  "00049",
-			  "00050",
-			  "00051",
-			  "00052",
-			  "00053",
-			  "00054",
-			  "00055",
-			  "00056",
-			  "00057",
-			  "00058",
-			  "00059",
-			  "00060",
-			  "00061"]
+			  "00042"]
 
 # initialize the optimizer and model
 print("[INFO] compiling model...")
 opt = SGD(lr=0.01)
-model = ShallowNet.build(width=32, height=32, depth=3, classes=62)
+model = LeNet.build(width=32, height=32, depth=3, classes=43)
 model.compile(loss="categorical_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
 
 # train the network
 print("[INFO] training network...")
 H = model.fit(trainX, trainY, validation_data=(testX, testY),
-	batch_size=32, epochs=40, verbose=1)
+	batch_size=128, epochs=32, verbose=1)
 
 print("[INFO] serializing network...")
 model.save(args["model"])

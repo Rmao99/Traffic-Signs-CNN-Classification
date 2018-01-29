@@ -6,10 +6,10 @@
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
-from shallownet.preprocessing import ImageToArrayPreprocessor
-from shallownet.preprocessing import SimplePreprocessor
-from shallownet.datasets import SimpleDatasetLoader
-from shallownet.nn.conv import ShallowNet
+from cnn.preprocessing import ImageToArrayPreprocessor
+from cnn.preprocessing import SimplePreprocessor
+from cnn.datasets import SimpleDatasetLoader
+from cnn.nn.conv import ShallowNet
 from keras.optimizers import SGD
 from imutils import paths
 import matplotlib.pyplot as plt
@@ -27,7 +27,7 @@ print("[INFO] loading images...")
 trainingImagePaths = list(paths.list_images(args["training"]))
 
 
-sp = SimplePreprocessor(32,32)
+sp = SimplePreprocessor(28,28)
 iap = ImageToArrayPreprocessor()
 
 #list of preprocessors to be applied in sequential order. First reordered to 32x32, then channel ordered properly to keras.json file
@@ -90,7 +90,7 @@ labelNames = ["00000",
 # initialize the optimizer and model
 print("[INFO] compiling model...")
 opt = SGD(lr=0.01)
-model = ShallowNet.build(width=32, height=32, depth=3, classes=43)
+model = ShallowNet.build(width=28, height=28, depth=3, classes=43)
 model.compile(loss="categorical_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
 
