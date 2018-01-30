@@ -104,7 +104,7 @@ labelNames = ["00000",
 
 # initialize the optimizer and model
 print("[INFO] compiling model...")
-opt = SGD(lr=0.01)
+opt = SGD(lr=0.01, decay =0.01/40, momentum = 0.9, nesterov=True)
 model = LeNet.build(width=28, height=28, depth=3, classes=43)
 model.compile(loss="categorical_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
@@ -152,4 +152,4 @@ plt.title("Training Loss and Accuracy")
 plt.xlabel("Epoch #")
 plt.ylabel("Loss/Accuracy")
 plt.legend()
-plt.show()
+plt.savefig("lenet_trafficsigns_final.png")
