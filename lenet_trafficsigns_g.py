@@ -26,7 +26,7 @@ args = vars(ap.parse_args())
 print("[INFO] loading images...")
 trainingImagePaths = list(paths.list_images(args["training"]))
 
-sp = SimplePreprocessor(32,32)
+sp = SimplePreprocessor(28,28)
 iap = ImageToArrayPreprocessor()
 
 #list of preprocessors to be applied in sequential order. First reordered to 32x32, then channel ordered properly to keras.json file
@@ -89,21 +89,21 @@ labelNames = ["00000",
 # initialize the optimizer and model
 print("[INFO] compiling model...")
 opt = SGD(lr=0.01)
-model = LeNet.build(width=32, height=32, depth=3, classes=43)
+model = LeNet.build(width=28, height=28, depth=3, classes=43)
 model.compile(loss="categorical_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
 
 # train the network
 print("[INFO] training network...")
 H = model.fit(trainX, trainY, validation_data=(testX, testY),
-	batch_size=128, epochs=32, verbose=1)
+	batch_size=128, epochs=40, verbose=1)
 
 print("[INFO] serializing network...")
 model.save(args["model"])
 
 # evaluate the network
 print("[INFO] evaluating network...")
-predictions = model.predict(testX, batch_size=32)
+predictions = model.predict(testX, batch_size=128)
 print(classification_report(testY.argmax(axis=1),
 	predictions.argmax(axis=1), target_names=labelNames))
 
