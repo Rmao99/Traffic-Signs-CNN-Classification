@@ -1,27 +1,43 @@
 # USAGE
-# python lenet_trafficsigns_g.py --training ./datasets/GTSRB/Training/ --model lenet_trafficsigns_weights_g.hdf5
+# python lenet_trafficsigns_g.py --training ./datasets/GTSRB/Training/ --model lenet_trafficsigns_weights_g.hdf5 --output output --weights weights/improvements
+#find ./ -printf "%f\n" | sort
 
 # import the necessary packages
+
+import matplotlib
+matplotlib.use("Agg") #ensures figures can be saved in backgroudn
 
 from sklearn.preprocessing import LabelBinarizer
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
+
+
 from cnn.preprocessing import ImageToArrayPreprocessor
 from cnn.preprocessing import SimplePreprocessor
 from cnn.datasets import SimpleDatasetLoader
 from cnn.nn.conv import LeNet
+from cnn.callbacks import TrainingMonitor
+
+from keras.callbacks import ModelCheckpoint
 from keras.optimizers import SGD
 from imutils import paths
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
+import os
 
 ap = argparse.ArgumentParser()
-ap.add_argument("-tr", "--training", required=True,
+ap.add_argument("-t", "--training", required=True,
 	help="path to input dataset")
 ap.add_argument("-m", "--model", required=True,
 	help ="path to output model")
+ap.add_argument("-o", "--output", required=True,
+	help= "path to output dictionary")
+ap.add_argument("-w", "--weights", required=True,
+	help= "path to weights directory")
 args = vars(ap.parse_args())
+
+print("[INFO] process ID: {}".format(os.getpid())) #shows the process ID info
 
 print("[INFO] loading images...")
 trainingImagePaths = list(paths.list_images(args["training"]))
@@ -32,7 +48,7 @@ iap = ImageToArrayPreprocessor()
 #list of preprocessors to be applied in sequential order. First reordered to 32x32, then channel ordered properly to keras.json file
 sdl = SimpleDatasetLoader(preprocessors=[sp,iap]) #loads dataset then scale the raw pixel intensities from [0,1]
 (data,labels) = sdl.load(trainingImagePaths,verbose = 500)
-data = data.astype("float")/255.0
+data = data.astype("float")/255.0 #scale to range [0,1]
 
 (trainX, testX, trainY, testY) = train_test_split(data,labels, test_size = 0.25, random_state=42)
 
@@ -93,10 +109,27 @@ model = LeNet.build(width=28, height=28, depth=3, classes=43)
 model.compile(loss="categorical_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
 
+
+#training monitor
+figPath = os.path.sep.join([args["output"], "{}.png".format(
+	os.getpid())])
+jsonPath = os.path.sep.join([args["output"], "{}.json".format(
+	os.getpid())])
+#callbacks = [TrainingMonitor(figPath, jsonPath=jsonPath)]
+
+
+# construct the callback to save only the current *best* model to disk based on the validation loss
+fname = os.path.sep.join([args["weights"],
+	"weights-{epoch:03d}-{val_loss:.4f}.hdf5"]) #naming: epoch# to 3 digits, and second is variable set for monitoring
+checkpoint = ModelCheckpoint(fname, monitor="val_loss", mode="min",
+	save_best_only=True, verbose=1) #creates model checkpoint. Lower the minimum val_loss the better.
+callbacks = [TrainingMonitor(figPath, jsonPath=jsonPath), checkpoint] #chain callbacks
+
+
 # train the network
 print("[INFO] training network...")
 H = model.fit(trainX, trainY, validation_data=(testX, testY),
-	batch_size=128, epochs=40, verbose=1)
+	batch_size=128, epochs=40, callbacks=callbacks, verbose=1)
 
 print("[INFO] serializing network...")
 model.save(args["model"])
@@ -107,7 +140,8 @@ predictions = model.predict(testX, batch_size=128)
 print(classification_report(testY.argmax(axis=1),
 	predictions.argmax(axis=1), target_names=labelNames))
 
-#plot training loss and accuracy
+#plot training loss and accuracy.
+#commented out b/c monitoring path
 plt.style.use("ggplot")
 plt.figure()
 plt.plot(np.arange(0, 40), H.history["loss"], label="train_loss")
