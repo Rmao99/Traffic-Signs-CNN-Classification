@@ -1,6 +1,7 @@
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D
 from keras.layers.convolutional import MaxPooling2D
+from keras.layers.normalization import BatchNormalization
 from keras.layers.core import Activation
 from keras.layers.core import Flatten
 from keras.layers.core import Dense
@@ -12,10 +13,11 @@ class LeNet:
 		# initialize the model
 		model = Sequential()
 		inputShape = (height, width, depth)
-
+		chanDim =-1
 		# if we are using "channels first", update the input shape
 		if K.image_data_format() == "channels_first":
 			inputShape = (depth, height, width)
+			chanDim=1
 
 		# first set of CONV => RELU => POOL layers
 		model.add(Conv2D(20, (5, 5), padding="same",
@@ -34,6 +36,7 @@ class LeNet:
 		model.add(Flatten())
 		model.add(Dense(500))
 		model.add(Activation("relu"))
+		model.add(BatchNormalization())
 
 		# softmax classifier
 		model.add(Dense(classes))
