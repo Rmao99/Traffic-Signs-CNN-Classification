@@ -1,8 +1,8 @@
 # Traffic-Signs-CNN-Classification
 Use convolutional neural networks to detect traffic signs using both shallownet and lenet networks.
 
-**Richard Mao\
-**1/31/2018
+**Richard Mao**\
+**1/31/2018**
 
 Code:
 [*https://github.com/Rmao99/Traffic-Signs-CNN-Classification*](https://github.com/Rmao99/Traffic-Signs-CNN-Classification)
@@ -25,7 +25,7 @@ different types of traffic signs of varying sizes, lighting, and angles.
 I eventually switched to a German Traffic Sign Dataset which consisted
 of over 12,000 images of 43 different types of traffic signs.
 
-![](/images/image1.png){width="6.5in" height="3.736111111111111in"}
+![](/images/image1.png)
 
 **Structure:** With the images, I first split the data into training and
 testing sets, scaling all images to the same size, before feeding it
@@ -62,7 +62,7 @@ Conv -&gt; ReLU -&gt; FC.
 With this model, providing it input images from the Belgium Dataset
 resulted in an accuracy of 93%. (next to the “avg/total” label).
 
-![](/images/image11.png){width="6.5in" height="3.3055555555555554in"}\
+![](/images/image11.png)\
 \
 The data is split into two parts, training and value. The curves
 produced from the training loss and accuracy graphs are from the actual
@@ -81,7 +81,7 @@ while it had less unique signs, had a plethora of data available.\
 With this new dataset and same convolutional neural network model, the
 classifier then achieved 95% accuracy.
 
-![](/images/image7.png){width="6.5in" height="3.1527777777777777in"}
+![](/images/image7.png)
 
 **LeNet :** I decided at this point to upgrade the network to achieve
 better results. 95% accuracy is good but not quite there. This format 
@@ -101,8 +101,7 @@ With a more complex network, I expected the accuracy to increase
 dramatically and the loss to decrease significantly, however after
 training this network, the accuracy was actually lower than before at
 93%.\
-![](/images/image12.png){width="6.644198381452319in"
-height="3.119792213473316in"}\
+![](/images/image12.png)\
 Looking at the graph reveals why. Initially the training was going well:
 The value loss was decreasing as expected-albeit a bit rough. However,
 after around 30 epochs (30 iterations), the data started to overfit (the
@@ -126,8 +125,7 @@ until it finished training. As a result of this change, the network
 achieved 98% accuracy. The value loss also decreased much more smoothly
 in this case.
 
-![](/images/image9.png){width="6.588542213473316in"
-height="3.2520363079615047in"}
+![](/images/image9.png)
 
 I decided to further implement Batch Normalization, which is a useful
 technique that “normalizes” previous activations. It further lowers
@@ -136,17 +134,11 @@ hidden layer values can change.\
 \
 With this implemented, the accuracy of the classifier finally improved
 to 99%\
-![](/images/image3.png){width="6.5in" height="3.0416666666666665in"}
+![](/images/image3.png)
 
 **Example Tests:**
 
-![](/images/image6.png){width="1.32754593175853in"
-height="1.3489588801399826in"}![](/images/image2.png){width="1.3489588801399826in"
-height="1.3489588801399826in"}![](/images/image5.png){width="1.274015748031496in"
-height="1.3489588801399826in"}![](/images/image8.png){width="1.4852154418197725in"
-height="1.328125546806649in"}![](/images/image10.png){width="1.34375in"
-height="1.3333333333333333in"}![](/images/image4.png){width="1.4010422134733158in"
-height="1.4010422134733158in"}
+<img src="images/image6.png" width="129.5000524934" height="129.5000524934"> <img src="images/image2.png" width="129.5000524934" height="129.5000524934"> <img src="images/image5.png" width="129.5000524934" height="129.5000524934"> <img src="images/image8.png" width="129.5000524934" height="129.5000524934"> <img src="images/image10.png" width="129.5000524934" height="129.5000524934"> <img src="images/image4.png" width="129.5000524934" height="129.5000524934">
 
 *Note: The labels on these images go from 00000 - 00042. 00000
 corresponds to the first sign type, 00001 corresponds to the second sign
