@@ -133,7 +133,7 @@ overfitting because it acts like a regulator by reducing how much the
 hidden layer values can change.\
 \
 With this implemented, the accuracy of the classifier finally improved
-to 99%\
+to 99%. The final classifier is the .hdf5 file\
 ![](/images/image3.png)
 
 **Example Tests:**
