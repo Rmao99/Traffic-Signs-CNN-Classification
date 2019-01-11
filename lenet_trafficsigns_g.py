@@ -1,5 +1,5 @@
 # USAGE
-# python lenet_trafficsigns_g.py --training ./datasets/GTSRB/Training/ --model lenet_trafficsigns_weights_g.hdf5 --output output --weights weights/improvements
+# python lenet_trafficsigns_g.py --training ./datasets/GTSRB/Final_Training/Images --model lenet_trafficsigns_weights_g.hdf5 --output output --weights weights/improvements
 #find ./ -printf "%f\n" | sort
 
 # import the necessary packages
@@ -8,6 +8,8 @@ import matplotlib
 matplotlib.use("Agg") #ensures figures can be saved in backgroudn
 
 from sklearn.preprocessing import LabelBinarizer
+from sklearn.preprocessing import MultiLabelBinarizer
+
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report
 
@@ -21,10 +23,15 @@ from cnn.callbacks import TrainingMonitor
 from keras.callbacks import ModelCheckpoint
 from keras.optimizers import SGD
 from imutils import paths
+
 import matplotlib.pyplot as plt
 import numpy as np
 import argparse
 import os
+import glob
+
+
+
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-t", "--training", required=True,
@@ -40,6 +47,23 @@ args = vars(ap.parse_args())
 print("[INFO] process ID: {}".format(os.getpid())) #shows the process ID info
 
 print("[INFO] loading images...")
+
+#edited for CSV
+
+trainingPath = args["training"]
+os.chdir(trainingPath)
+result = glob.glob('*/**.csv')
+result.sort()
+
+sp = SimplePreprocessor(28,28)
+iap = ImageToArrayPreprocessor()
+
+sdl = SimpleDatasetLoader(preprocessors=[sp,iap])
+(data,labels) = sdl.load(result,verbose = 500) #modified load method in sdl
+data = data.astype("float")/255.0 #scale to range [0,1]
+
+
+'''original 
 trainingImagePaths = list(paths.list_images(args["training"]))
 
 sp = SimplePreprocessor(28,28)
@@ -49,15 +73,24 @@ iap = ImageToArrayPreprocessor()
 sdl = SimpleDatasetLoader(preprocessors=[sp,iap]) #loads dataset then scale the raw pixel intensities from [0,1]
 (data,labels) = sdl.load(trainingImagePaths,verbose = 500)
 data = data.astype("float")/255.0 #scale to range [0,1]
+'''
+
+print("Length of labels: ", len(labels))
+
 
 (trainX, testX, trainY, testY) = train_test_split(data,labels, test_size = 0.25, random_state=42)
 
 # convert the labels from integers to vectors
-lb = LabelBinarizer()
-trainY = lb.fit_transform(trainY)
-testY = lb.transform(testY)
+#lb = LabelBinarizer()
+lb = MultiLabelBinarizer()
 
-# initialize the label names for the CIFAR-10 dataset
+trainY = lb.fit_transform(trainY)
+#print(list(lb.classes_), len(lb.classes_))
+testY = lb.transform(testY)
+print(list(lb.classes_), len(lb.classes_))
+
+# initialize the label names for the German Traffic Sign dataset
+
 labelNames = ["00000", 
 			  "00001",
 			  "00002",
@@ -105,12 +138,13 @@ labelNames = ["00000",
 # initialize the optimizer and model
 print("[INFO] compiling model...")
 opt = SGD(lr=0.01, decay =0.01/40, momentum = 0.9, nesterov=True)
-model = LeNet.build(width=28, height=28, depth=3, classes=43)
+model = LeNet.build(width=28, height=28, depth=3, classes=len(lb.classes_))
 model.compile(loss="categorical_crossentropy", optimizer=opt,
 	metrics=["accuracy"])
 
-
-#training monitor
+######################
+'''#training monitor
+ add callbacks into model.fit section when uncommenting
 figPath = os.path.sep.join([args["output"], "{}.png".format(
 	os.getpid())])
 jsonPath = os.path.sep.join([args["output"], "{}.json".format(
@@ -124,12 +158,12 @@ fname = os.path.sep.join([args["weights"],
 checkpoint = ModelCheckpoint(fname, monitor="val_loss", mode="min",
 	save_best_only=True, verbose=1) #creates model checkpoint. Lower the minimum val_loss the better.
 callbacks = [TrainingMonitor(figPath, jsonPath=jsonPath), checkpoint] #chain callbacks
-
+'''###########################
 
 # train the network
 print("[INFO] training network...")
 H = model.fit(trainX, trainY, validation_data=(testX, testY),
-	batch_size=128, epochs=40, callbacks=callbacks, verbose=1)
+	batch_size=128, epochs=10, verbose=1)#callbacks=callbacks, verbose=1)
 
 print("[INFO] serializing network...")
 model.save(args["model"])
@@ -153,3 +187,4 @@ plt.xlabel("Epoch #")
 plt.ylabel("Loss/Accuracy")
 plt.legend()
 plt.savefig("lenet_trafficsigns_final.png")
+

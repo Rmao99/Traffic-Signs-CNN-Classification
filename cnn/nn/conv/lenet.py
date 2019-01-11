@@ -11,6 +11,7 @@ class LeNet:
 	@staticmethod
 	def build(width, height, depth, classes):
 		# initialize the model
+
 		model = Sequential()
 		inputShape = (height, width, depth)
 		chanDim =-1
