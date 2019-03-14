@@ -42,8 +42,8 @@ class SimpleDatasetLoader:
 
 			for (i,row) in enumerate(list(generator)):
 				image = cv2.imread(directory + '/' + row[1]['Filename'])
-				#label = directory
-				label = [directory, int(row[1]['Roi.X1']), int(row[1]['Roi.Y1']), int(row[1]['Roi.X2']),int(row[1]['Roi.Y2']) ]
+				label = directory
+				#label = [directory, int(row[1]['Roi.X1']), int(row[1]['Roi.Y1']), int(row[1]['Roi.X2']),int(row[1]['Roi.Y2']) ]
 
 		
 			
